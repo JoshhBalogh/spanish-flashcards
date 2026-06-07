@@ -67,6 +67,35 @@ body {
     gap: 1rem;
 }
 
+/* User Toggle */
+.user-toggle {
+    display: flex;
+    background-color: var(--secondary);
+    border-radius: 8px;
+    padding: 0.25rem;
+    gap: 0.25rem;
+}
+
+.btn-toggle {
+    border: none;
+    background: transparent;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--secondary-text);
+    transition: all 0.2s ease;
+}
+
+.btn-toggle.active {
+    background-color: var(--surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-toggle-j.active { color: var(--success); }
+.btn-toggle-r.active { color: #0ea5e9; }
+
 .control-group {
     display: flex;
     align-items: center;

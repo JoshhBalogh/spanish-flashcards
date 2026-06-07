@@ -75,6 +75,10 @@ function cacheDOM() {
     DOM.btnIdentityJ = document.getElementById('btn-identity-j');
     DOM.btnIdentityR = document.getElementById('btn-identity-r');
     
+    // Header Toggles
+    DOM.toggleJ = document.getElementById('toggle-j');
+    DOM.toggleR = document.getElementById('toggle-r');
+    
     // Stickers
     DOM.stickers = {
         frontJ: document.getElementById('sticker-front-j'),
@@ -94,18 +98,39 @@ function init() {
     if (!currentUser) {
         DOM.modalIdentity.classList.remove('hidden');
         
-        DOM.btnIdentityJ.addEventListener('click', () => setIdentity('J'));
-        DOM.btnIdentityR.addEventListener('click', () => setIdentity('R'));
+        DOM.btnIdentityJ.addEventListener('click', () => {
+            DOM.modalIdentity.classList.add('hidden');
+            switchUser('J');
+            startApp();
+        });
+        DOM.btnIdentityR.addEventListener('click', () => {
+            DOM.modalIdentity.classList.add('hidden');
+            switchUser('R');
+            startApp();
+        });
     } else {
+        if (currentUser === 'J') DOM.toggleJ.classList.add('active');
+        else DOM.toggleR.classList.add('active');
+        
         startApp();
     }
 }
 
-function setIdentity(user) {
+function switchUser(user) {
     currentUser = user;
     localStorage.setItem('vocabCurrentUser', user);
-    DOM.modalIdentity.classList.add('hidden');
-    startApp();
+    
+    if (user === 'J') {
+        DOM.toggleJ.classList.add('active');
+        DOM.toggleR.classList.remove('active');
+    } else {
+        DOM.toggleR.classList.add('active');
+        DOM.toggleJ.classList.remove('active');
+    }
+    
+    activePile = 'remaining';
+    shuffledOrder = [];
+    updateUI();
 }
 
 function startApp() {
@@ -142,6 +167,9 @@ function updateCardInFirebase(cardId, updates) {
 // BIND EVENTS
 // ==========================================
 function bindEvents() {
+    DOM.toggleJ.addEventListener('click', () => { if(currentUser !== 'J') switchUser('J'); });
+    DOM.toggleR.addEventListener('click', () => { if(currentUser !== 'R') switchUser('R'); });
+
     DOM.studyMode.addEventListener('change', (e) => {
         currentMode = e.target.value;
         if (currentCardId) renderCard(getCurrentCard());

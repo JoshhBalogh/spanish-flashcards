@@ -227,6 +227,31 @@ function bindEvents() {
     });
     DOM.btnCancelDelete.addEventListener('click', () => hideModal(DOM.modalDelete));
     DOM.btnConfirmDelete.addEventListener('click', handleDeleteConfirm);
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', handleKeyboardShortcuts);
+}
+
+function handleKeyboardShortcuts(e) {
+    // Don't trigger shortcuts if user is typing in an input or if a modal is open
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    
+    const isAnyModalOpen = !DOM.modalIdentity.classList.contains('hidden') || 
+                           !DOM.modalAdd.classList.contains('hidden') || 
+                           !DOM.modalDelete.classList.contains('hidden');
+                           
+    if (isAnyModalOpen || !currentCardId) return;
+
+    if (e.code === 'Space') {
+        e.preventDefault(); // prevent page scrolling
+        DOM.flashcard.classList.toggle('is-flipped');
+    } else if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        handleAction('needPractice');
+    } else if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        handleAction('known');
+    }
 }
 
 // ==========================================

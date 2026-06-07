@@ -20,16 +20,7 @@ if (!firebase.apps.length) {
 const db = firebase.database();
 const cardsRef = db.ref('cards');
 
-// ==========================================
-// DEFAULT DATA & STATE
-// ==========================================
-const defaultCards = [
-    { word: "Ephemeral", pronunciation: "/ɪˈfem(ə)rəl/", definition: "Lasting for a very short time." },
-    { word: "Ubiquitous", pronunciation: "/juːˈbɪkwɪtəs/", definition: "Present, appearing, or found everywhere." },
-    { word: "Sycophant", pronunciation: "/ˈsɪkəfant/", definition: "A person who acts obsequiously toward someone important in order to gain advantage." },
-    { word: "Mellifluous", pronunciation: "/mɛˈlɪflʊəs/", definition: "(of a voice or words) sweet or musical; pleasant to hear." }
-    // Truncated for brevity, normally you'd put all 20 here.
-];
+// No default cards - user will upload their own list.
 
 let cards = []; // Local mirror of Firebase data
 let activePile = 'remaining'; // 'remaining', 'known', 'needPractice'
@@ -126,24 +117,6 @@ function startApp() {
 // FIREBASE LOGIC
 // ==========================================
 function setupFirebaseListeners() {
-    // Check if DB is empty, if so, seed it
-    cardsRef.once('value').then(snapshot => {
-        if (!snapshot.exists()) {
-            console.log("Seeding initial data to Firebase...");
-            defaultCards.forEach(cardData => {
-                const newRef = cardsRef.push();
-                newRef.set({
-                    id: newRef.key,
-                    word: cardData.word,
-                    pronunciation: cardData.pronunciation,
-                    definition: cardData.definition,
-                    piles: { J: 'remaining', R: 'remaining' },
-                    knownBy: {} // { J: true, R: true }
-                });
-            });
-        }
-    });
-
     // Real-time listener
     cardsRef.on('value', (snapshot) => {
         const data = snapshot.val();

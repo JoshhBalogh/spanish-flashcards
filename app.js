@@ -127,9 +127,8 @@ function switchUser(user) {
         DOM.toggleR.classList.add('active');
         DOM.toggleJ.classList.remove('active');
     }
-    
     activePile = 'remaining';
-    shuffledOrder = [];
+    activeQueue = [];
     updateUI();
 }
 
@@ -337,35 +336,24 @@ function renderCard(card) {
     }, 100);
 }
 
-// Temporary variable to hold a manually shuffled order
-let shuffledOrder = [];
+// Temporary variable to hold the order of cards
+let activeQueue = [];
 
 function nextCard(immediate = false) {
-    const activeCards = getCardsInPile(activePile);
+    const validIds = getCardsInPile(activePile).map(c => c.id);
+    
+    // Clean up queue: remove cards that are no longer in the pile
+    activeQueue = activeQueue.filter(id => validIds.includes(id));
+    
+    // Add any new cards to the back of the queue
+    validIds.forEach(id => {
+        if (!activeQueue.includes(id)) activeQueue.push(id);
+    });
     
     const displayNext = () => {
-        if (activeCards.length > 0) {
-            // Find next card using shuffled order if available, otherwise just first element
-            let nextCardObj = null;
-            
-            if (shuffledOrder.length > 0) {
-                // Find first card in shuffled order that still belongs to active pile
-                for (let i = 0; i < shuffledOrder.length; i++) {
-                    const found = activeCards.find(c => c.id === shuffledOrder[i]);
-                    if (found) {
-                        nextCardObj = found;
-                        break;
-                    }
-                }
-            }
-            
-            // Fallback
-            if (!nextCardObj) {
-                nextCardObj = activeCards[0];
-            }
-
-            currentCardId = nextCardObj.id;
-            renderCard(nextCardObj);
+        if (activeQueue.length > 0) {
+            currentCardId = activeQueue[0];
+            renderCard(getCurrentCard());
             
             DOM.flashcardContainer.classList.remove('hidden');
             DOM.actionButtons.classList.remove('hidden');
@@ -390,7 +378,19 @@ function nextCard(immediate = false) {
 function handleAction(targetPile) {
     if (!currentCardId) return;
     
+    // If we are placing the card in the same pile it's already in
+    // (e.g. clicking Checkmark while in Known pile), cycle it to the back!
+    if (targetPile === activePile) {
+        const id = activeQueue.shift();
+        activeQueue.push(id);
+        nextCard();
+        return;
+    }
+    
     const card = getCurrentCard();
+    
+    // Remove from queue immediately so it doesn't flash before firebase syncs
+    activeQueue = activeQueue.filter(id => id !== currentCardId);
     
     // Update the pile for the CURRENT user only
     const updates = {};
@@ -402,24 +402,19 @@ function handleAction(targetPile) {
     }
 
     updateCardInFirebase(currentCardId, updates);
-    
-    // Note: Firebase onValue listener will automatically trigger updateUI() and nextCard()
 }
 
 // ==========================================
 // HEADER ACTIONS
 // ==========================================
 function shuffleActivePile() {
-    const activeCards = getCardsInPile(activePile);
-    if (activeCards.length <= 1) return;
+    if (activeQueue.length <= 1) return;
     
-    let ids = activeCards.map(c => c.id);
-    for (let i = ids.length - 1; i > 0; i--) {
+    // Fisher-Yates shuffle the queue
+    for (let i = activeQueue.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [ids[i], ids[j]] = [ids[j], ids[i]];
+        [activeQueue[i], activeQueue[j]] = [activeQueue[j], activeQueue[i]];
     }
-    
-    shuffledOrder = ids;
     
     DOM.flashcard.classList.add('fade-out');
     setTimeout(() => {
@@ -434,7 +429,6 @@ function resetAllPiles() {
     cards.forEach(card => {
         if (card.piles[currentUser] !== 'remaining') {
             updates[`${card.id}/piles/${currentUser}`] = 'remaining';
-            // NOTE: We DO NOT reset knownBy, so stickers remain permanently!
         }
     });
     
@@ -443,7 +437,7 @@ function resetAllPiles() {
     }
     
     activePile = 'remaining';
-    shuffledOrder = [];
+    activeQueue = [];
     updateUI();
 }
 

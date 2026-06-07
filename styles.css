@@ -1,0 +1,530 @@
+:root {
+    /* Color Palette */
+    --primary: #4F46E5;
+    --primary-hover: #4338CA;
+    --danger: #EF4444;
+    --danger-hover: #DC2626;
+    --success: #10B981;
+    --success-hover: #059669;
+    --secondary: #E5E7EB;
+    --secondary-hover: #D1D5DB;
+    --secondary-text: #4B5563;
+    
+    --bg-color: #F3F4F6;
+    --surface: #FFFFFF;
+    --text-main: #111827;
+    --text-muted: #6B7280;
+    
+    --border: #E5E7EB;
+    
+    /* Box Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Header */
+.app-header {
+    background-color: var(--surface);
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.app-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), #8B5CF6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+select {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-family: inherit;
+    font-size: 0.9rem;
+    outline: none;
+    cursor: pointer;
+    background-color: var(--surface);
+}
+
+select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+/* Buttons */
+.btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: var(--secondary);
+    color: var(--secondary-text);
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-hover);
+}
+
+.btn-danger {
+    background-color: var(--surface);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+}
+
+.btn-danger:hover {
+    background-color: var(--danger);
+    color: white;
+}
+
+/* Main Content */
+.app-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+}
+
+/* Piles */
+.piles-container {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    background: var(--surface);
+    padding: 0.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.pile {
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.pile:hover {
+    background-color: var(--bg-color);
+}
+
+.pile.indicator-active {
+    background-color: rgba(79, 70, 229, 0.05);
+    border-color: var(--primary);
+}
+
+.pile.indicator-active .pile-name {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.pile-name {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+
+.pile-count {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* Flashcard Area */
+.flashcard-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    position: relative;
+    min-height: 450px; /* Pre-allocate space to prevent jumping */
+}
+
+/* Completion Message */
+.completion-message {
+    text-align: center;
+    background: var(--surface);
+    padding: 3rem 2rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    animation: fadeIn 0.4s ease;
+    width: 100%;
+}
+
+.completion-message h2 {
+    color: var(--success);
+    margin-bottom: 1rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Flashcard */
+.flashcard-container {
+    perspective: 1500px;
+    width: 100%;
+    height: 350px;
+    margin-bottom: 2rem;
+}
+
+.flashcard {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+.flashcard.is-flipped {
+    transform: rotateY(180deg);
+}
+
+/* Fade animation when switching cards */
+.flashcard.fade-out {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background: var(--surface);
+    border-radius: 24px;
+    box-shadow: var(--shadow-xl);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    text-align: center;
+}
+
+.card-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+}
+
+.card-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+    word-break: break-word;
+}
+
+.pronunciation {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Card Menu */
+.btn-more-options {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s;
+    z-index: 2;
+}
+
+.btn-more-options:hover {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+}
+
+.menu-dropdown {
+    position: absolute;
+    top: 4rem;
+    right: 1.5rem;
+    background: var(--surface);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    z-index: 10;
+    overflow: hidden;
+    min-width: 150px;
+    animation: fadeIn 0.2s ease;
+}
+
+.menu-dropdown button {
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    color: var(--danger);
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.menu-dropdown button:hover {
+    background: var(--bg-color);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 3rem;
+    margin-top: 1rem;
+}
+
+.btn-action {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    box-shadow: var(--shadow-md);
+    background: var(--surface);
+}
+
+.btn-no {
+    color: var(--danger);
+}
+
+.btn-yes {
+    color: var(--success);
+}
+
+.btn-action:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-no:hover {
+    background-color: var(--danger);
+    color: white;
+}
+
+.btn-yes:hover {
+    background-color: var(--success);
+    color: white;
+}
+
+/* Modals */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal {
+    background: var(--surface);
+    width: 90%;
+    max-width: 500px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-size: 1.25rem;
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: color 0.2s;
+}
+
+.btn-close-modal:hover {
+    color: var(--text-main);
+}
+
+.modal-body, form {
+    padding: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.form-group input, .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.modal-actions {
+    padding: 1rem 1.5rem;
+    background: var(--bg-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stickers UI */
+.stickers-container {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 2;
+}
+
+.sticker {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: white;
+    box-shadow: var(--shadow-sm);
+    animation: fadeIn 0.3s ease, bounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sticker-j {
+    background-color: var(--success); /* Green for J */
+}
+
+.sticker-r {
+    background-color: #0ea5e9; /* Blue for R */
+}
+
+@keyframes bounce {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Vocabulary Flashcards</title>
+    <meta name="description" content="A premium, locally-persisted vocabulary flashcard application.">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Main Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <header class="app-header">
+        <h1>Vocab Master</h1>
+        <div class="header-controls">
+            <div class="control-group">
+                <label for="study-mode">Study Mode:</label>
+                <select id="study-mode">
+                    <option value="word-first">Word First</option>
+                    <option value="definition-first">Definition First</option>
+                </select>
+            </div>
+            <button id="btn-add-word" class="btn btn-primary">Add Word</button>
+            <button id="btn-shuffle" class="btn btn-secondary">Shuffle</button>
+            <button id="btn-reset" class="btn btn-danger">Reset</button>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <div class="piles-container">
+            <div class="pile indicator-active" data-pile="remaining">
+                <span class="pile-name">Remaining</span>
+                <span class="pile-count" id="count-remaining">0</span>
+            </div>
+            <div class="pile" data-pile="known">
+                <span class="pile-name">Known</span>
+                <span class="pile-count" id="count-known">0</span>
+            </div>
+            <div class="pile" data-pile="needPractice">
+                <span class="pile-name">Need Practice</span>
+                <span class="pile-count" id="count-needPractice">0</span>
+            </div>
+        </div>
+
+        <div class="flashcard-area">
+            <div id="completion-message" class="completion-message hidden">
+                <h2>Pile Completed!</h2>
+                <p id="completion-text">You've gone through all the cards in the pile! Click on another pile above to keep studying, or click Reset to start over.</p>
+            </div>
+
+            <div id="flashcard-container" class="flashcard-container">
+                <div id="flashcard" class="flashcard">
+                    <div class="card-face card-front">
+                        <div class="stickers-container">
+                            <span id="sticker-front-j" class="sticker sticker-j hidden">J</span>
+                            <span id="sticker-front-r" class="sticker sticker-r hidden">R</span>
+                        </div>
+                        <button class="btn-more-options" aria-label="More options">
+                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                        </button>
+                        <div class="menu-dropdown hidden">
+                            <button id="btn-delete-card">Delete this card</button>
+                        </div>
+                        <div class="card-content">
+                            <h2 id="front-primary">Word</h2>
+                            <p id="front-secondary" class="pronunciation">/pronunciation/</p>
+                        </div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="stickers-container">
+                            <span id="sticker-back-j" class="sticker sticker-j hidden">J</span>
+                            <span id="sticker-back-r" class="sticker sticker-r hidden">R</span>
+                        </div>
+                        <button class="btn-more-options" aria-label="More options">
+                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                        </button>
+                        <div class="menu-dropdown hidden">
+                            <button id="btn-delete-card-back">Delete this card</button>
+                        </div>
+                        <div class="card-content">
+                            <h2 id="back-primary">Definition</h2>
+                            <p id="back-secondary" class="pronunciation hidden"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="action-buttons" class="action-buttons">
+                <button id="btn-no" class="btn-action btn-no" aria-label="Need Practice">
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                <button id="btn-yes" class="btn-action btn-yes" aria-label="Known">
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Add Word Modal -->
+    <div id="modal-add" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Add New Word</h2>
+                <button class="btn-close-modal" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="form-add-word">
+                <div class="form-group">
+                    <label for="input-word">Word</label>
+                    <input type="text" id="input-word" required placeholder="e.g. Ubiquitous">
+                </div>
+                <div class="form-group">
+                    <label for="input-pronunciation">Pronunciation</label>
+                    <input type="text" id="input-pronunciation" placeholder="e.g. /juːˈbɪkwɪtəs/">
+                </div>
+                <div class="form-group">
+                    <label for="input-definition">Definition</label>
+                    <textarea id="input-definition" required placeholder="Present, appearing, or found everywhere." rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary btn-cancel-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Card</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="modal-delete" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Confirm Deletion</h2>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure? This will permanently delete the card from your vocabulary list.</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary btn-cancel-delete">Cancel</button>
+                <button type="button" id="btn-confirm-delete" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Identity Selection Modal -->
+    <div id="modal-identity" class="modal-overlay hidden">
+        <div class="modal" style="text-align: center;">
+            <div class="modal-header" style="justify-content: center;">
+                <h2>Who is studying right now?</h2>
+            </div>
+            <div class="modal-body">
+                <p>Select your identity to track your individual progress and stickers.</p>
+                <div class="action-buttons" style="justify-content: center; margin-top: 2rem;">
+                    <button id="btn-identity-j" class="btn btn-primary" style="font-size: 1.5rem; padding: 1rem 2rem;">I am J</button>
+                    <button id="btn-identity-r" class="btn btn-primary" style="font-size: 1.5rem; padding: 1rem 2rem; background-color: #0ea5e9;">I am R</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -60,6 +60,7 @@ function cacheDOM() {
     DOM.btnMoreOptions = document.querySelectorAll('.btn-more-options');
     DOM.menuDropdowns = document.querySelectorAll('.menu-dropdown');
     DOM.btnDeleteCards = [document.getElementById('btn-delete-card'), document.getElementById('btn-delete-card-back')];
+    DOM.btnRemoveStickers = document.querySelectorAll('.btn-remove-sticker');
     
     // Modals
     DOM.modalAdd = document.getElementById('modal-add');
@@ -217,6 +218,18 @@ function bindEvents() {
         }
     });
 
+    DOM.btnRemoveStickers.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            DOM.menuDropdowns.forEach(menu => menu.classList.add('hidden'));
+            if (currentCardId) {
+                const updates = {};
+                updates[`knownBy/${currentUser}`] = null;
+                updateCardInFirebase(currentCardId, updates);
+            }
+        });
+    });
+
     DOM.btnDeleteCards.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -317,6 +330,13 @@ function renderCard(card) {
         DOM.stickers.frontR.classList.add('hidden');
         DOM.stickers.backR.classList.add('hidden');
     }
+    
+    // Show "Remove my sticker" button only if the current user has a sticker
+    const iKnowIt = (currentUser === 'J' && knowsJ) || (currentUser === 'R' && knowsR);
+    DOM.btnRemoveStickers.forEach(btn => {
+        if (iKnowIt) btn.classList.remove('hidden');
+        else btn.classList.add('hidden');
+    });
     
     // Update Text Content
     setTimeout(() => {
